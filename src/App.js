@@ -1,11 +1,11 @@
 import './App.css';
 import { useState, useEffect } from 'react';
-import { getTodos } from './actions/todos';
+import { getTodos, postTodo, putTodo, deleteTodo } from './actions/todos';
 
-const todos = [{
+const initialTodos = [{
   id: 1,
   description: 'say hello',
-  isDone: false
+  isDone: false 
 },
 {
   id: 2,
@@ -15,24 +15,47 @@ const todos = [{
 ]
 
 function App() {
+  const [todos, setTodos] = useState([]);
   const [todo, setTodo] = useState('');
 
 useEffect(() => {
-  getTodos().then(res => {
-    console.log('this will be the result');
-    console.log(res);
-  });
+  getData();
 }, [])
+
+const getData = () => {
+  getTodos().then(res => {
+    setTodos(res)
+  })
+}
+
+const addTodo = () => {
+  postTodo(todo).then(() => {
+    getData();
+  })
+}
+
+const completeTodo = (todo) => {
+  const newTodo = {...todo, isDone: true};
+  putTodo(newTodo).then(() => {
+    getData();
+  })
+}
+
+const deleteTodoItem = (id) => {
+    deleteTodo(id).then(() => {
+      getData();
+    })
+}
 
   return (
     <div className="App">
       <input value={todo} onChange={(e) => setTodo(e.target.value)} />
-      <button>Submit</button>
+      <button onClick={() => addTodo()}>Submit</button>
       {todos.map((todo, index) => (
         <div key={index}>
           <span className={todo.isDone ? 'done' : ''}> {todo.description} </span>
           <span>
-            <button>{todo.isDone ? 'Delete' : 'Complete' }</button>
+            {todo.isDone ? <button onClick={() => deleteTodoItem(todo.id)}>Delete</button> : <button onClick={() => completeTodo(todo)}>Complete</button>}
           </span>
         </div>
       ))}
